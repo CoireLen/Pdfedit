@@ -69,46 +69,56 @@ Page::~Page()
 class Doc
 {
 public:
-    Doc(QString);
+    Doc(QByteArray & qpath);
     ~Doc();
     int pagecount() { return fz_count_pages(ctx, doc); };
     fz_pixmap* GetPageToPixmap(int page_number);
     void save();
     void del_page(int);
     void set_rotation(int,int);
+    void DorpPixmap(fz_pixmap* pix);
+    void DropDoc();
 private:
     Doc();
-    QString openfilepath;
+    QByteArray openfilepath;
     fz_document* doc;
     fz_context* ctx;
     pdf_document* pdf;
 };
-Doc::Doc(QString qpath) {
+Doc::Doc(QByteArray &qpath) {
     ctx = fz_new_context(NULL, NULL, FZ_STORE_UNLIMITED);
     if (!ctx)
     {
+        printf("\nnew context err\n");
         return;
     }
     fz_try(ctx)
         fz_register_document_handlers(ctx);
     fz_catch(ctx)
     {
+        printf("\nreg doc hendler err\n");
         fz_drop_context(ctx);
         return;
     }
     fz_try(ctx) {
-        doc = fz_open_document(ctx, (char*)qpath.toStdString().c_str());
-        openfilepath = qpath;
-        pdf = pdf_specifics(ctx, doc);
+        printf("\nfilepath:%s", qpath.data());
+        this->doc = fz_open_document(ctx, qpath.data());
+        this->openfilepath = qpath;
+        this->pdf = pdf_specifics(ctx, doc);
     }
     fz_catch(ctx)
     {
+        printf("\ndoc open err\n");
         fz_drop_context(ctx);
+        ctx = 0;
         return;
     }
 }
 fz_pixmap* Doc::GetPageToPixmap(int page_number) {
     return fz_new_pixmap_from_page_number(ctx, doc, page_number, fz_scale(1,1), fz_device_rgb(ctx), 0);
+}
+void Doc::DorpPixmap(fz_pixmap*pix) {
+    fz_drop_pixmap(ctx, pix);
 }
 void Doc::save() {
     fz_try(ctx) {
@@ -126,7 +136,7 @@ void Doc::save() {
         opts.do_sanitize = 0;
         opts.do_encrypt = 0;
         opts.permissions = -1;
-        pdf_save_document(ctx, pdf,(const char *)openfilepath.toStdString().c_str(), &opts);
+        pdf_save_document(ctx, pdf,(const char *)openfilepath.data(), &opts);
     }
     fz_catch(ctx) {
         printf("Save Error");
@@ -150,7 +160,16 @@ void Doc::del_page(int page) {
         pdf_drop_page_tree(ctx, pdf);
     }
 }
+void Doc::DropDoc() {
+  
+}
 Doc::~Doc()
 {
     
+    printf("\ndrop pdf doc:");
+    pdf_drop_document(ctx, pdf);
+    printf("\ndrop doc:");
+    fz_drop_document(ctx, doc);
+    printf("\ndrop con:");
+    fz_drop_context(ctx);
 }
