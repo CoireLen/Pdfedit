@@ -3,58 +3,6 @@
 #include <iostream>
 #include <string>
 #include <qt5/QtCore/qstring.h>
-pdf_annot* JM_get_annot_by_name(fz_context* ctx, pdf_page* page, char* name)
-{
-    if (!name || strlen(name) == 0) {
-        return NULL;
-    }
-    pdf_annot** annotptr = NULL;
-    pdf_annot* annot = NULL;
-    int found = 0;
-    size_t len = 0;
-
-    fz_try(ctx) {   // loop thru MuPDF's internal annots and widget arrays
-        for (annotptr = &page->annots; *annotptr; annotptr = &(*annotptr)->next) {
-            annot = *annotptr;
-            const char* response = pdf_to_string(ctx, pdf_dict_gets(ctx, annot->obj, "NM"), &len);
-            if (strcmp(name, response) == 0) {
-                found = 1;
-                break;
-            }
-        }
-        if (!found) {
-            fz_throw(ctx, FZ_ERROR_GENERIC, "'%s' is not an annot of this page", name);
-        }
-    }
-    fz_catch(ctx) {
-        fz_rethrow(ctx);
-    }
-    return pdf_keep_annot(ctx, annot);
-}
-pdf_annot* JM_get_annot_by_xref(fz_context* ctx, pdf_page* page, int xref)
-{
-    pdf_annot** annotptr = NULL;
-    pdf_annot* annot = NULL;
-    int found = 0;
-    size_t len = 0;
-
-    fz_try(ctx) {   // loop thru MuPDF's internal annots array
-        for (annotptr = &page->annots; *annotptr; annotptr = &(*annotptr)->next) {
-            annot = *annotptr;
-            if (xref == pdf_to_num(ctx, annot->obj)) {
-                found = 1;
-                break;
-            }
-        }
-        if (!found) {
-            fz_throw(ctx, FZ_ERROR_GENERIC, "xref %d is not an annot of this page", xref);
-        }
-    }
-    fz_catch(ctx) {
-        fz_rethrow(ctx);
-    }
-    return pdf_keep_annot(ctx, annot);
-}
 class Page
 {
 public:
