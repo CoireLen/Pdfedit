@@ -7,11 +7,320 @@ from PyQt5.QtCore import *
 from typing import Optional
 from PyQt5.sip import delete
 import fitz
+from fitz.fitz import linkDest
 import numpy as np
 import cv2
-from numpy.lib.function_base import select
+from numpy.lib.function_base import append, select
+from numpy.lib.npyio import load
 
 main = {}
+class singlesilder(QWidget):#单控制条的窗口
+    def __init__(self,num,slider1start,slider1end,windowtitle):
+        super(doublesilder, self).__init__()
+        self.num=num
+        self.slider1=QSlider()
+        self.slider1.setRange(slider1start,slider1end);
+        self.setWindowTitle(windowtitle);
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+        self.slider1.valueChanged.connect(self.slider1change)
+        self.slider1.setOrientation(Qt.Horizontal)
+        self.label1datanum=0
+        self.label1data=""
+        self.resize(300,60);
+
+    def slider1change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value()))
+        main["OptimizeWindow"].MakeImg()
+        if self.label1datanum >1 :
+            if len(self.label1data)>self.slider1.value():
+                self.label1.setText(self.label1data[self.slider1.value()])
+            else:
+                self.label1.setText(self.label1data[0])
+
+    def SetShowLabel(self,num,data):
+        self.label1=QLabel()
+        self.label1datanum=num
+        self.label1data=data
+        if num>0:
+            self.layout.addWidget(self.label1)
+        self.layout.addWidget(self.slider1)
+
+
+
+class doublesilder(QWidget):#双控制条的窗口
+    def __init__(self,num,slider1start,slider1end,slider2start,slider2end,windowtitle):
+        super(doublesilder, self).__init__()
+        self.num=num
+        self.slider1=QSlider()
+        self.slider2=QSlider()
+        self.slider1.setRange(slider1start,slider1end);
+        self.slider2.setRange(slider2start,slider2end);
+        self.setWindowTitle(windowtitle);
+        layout = QGridLayout()
+        self.setLayout(layout)
+        layout.addWidget(self.slider1)
+        layout.addWidget(self.slider2)
+        self.slider1.valueChanged.connect(self.slider1change)
+        self.slider2.valueChanged.connect(self.slider2change)
+        self.slider1.setOrientation(Qt.Horizontal)
+        self.slider2.setOrientation(Qt.Horizontal)
+        self.resize(300,60);
+
+    def slider1change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value()))
+        main["OptimizeWindow"].MakeImg()
+    def slider2change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value()))
+        main["OptimizeWindow"].MakeImg()
+    
+class threesilder(QWidget):#三控制条的窗口
+    def __init__(self,num,slider1start,slider1end,slider2start,slider2end,slider3start,slider3end,windowtitle):
+        super(threesilder, self).__init__()
+        self.num=num
+        self.slider1=QSlider()
+        self.slider2=QSlider()
+        self.slider3=QSlider()
+        self.slider1.setRange(slider1start,slider1end);
+        self.slider2.setRange(slider2start,slider2end);
+        self.slider3.setRange(slider3start,slider3end);
+        self.setWindowTitle(windowtitle);
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
+        self.slider1.valueChanged.connect(self.slider1change)
+        self.slider2.valueChanged.connect(self.slider2change)
+        self.slider3.valueChanged.connect(self.slider3change)
+        self.slider1.setOrientation(Qt.Horizontal)
+        self.slider2.setOrientation(Qt.Horizontal)
+        self.slider3.setOrientation(Qt.Horizontal)
+        self.label1datanum=0
+        self.label1data=[""]
+        self.label2datanum=0
+        self.label2data=[""]
+        self.label3datanum=0
+        self.label3data=[""]
+        self.resize(300,90);
+
+    def slider1change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value(),self.slider3.value()))
+        main["OptimizeWindow"].MakeImg()
+        if self.label1datanum >1 :
+            if len(self.label1data)>self.slider1.value():
+                self.label1.setText(self.label1data[self.slider1.value()])
+            else:
+                self.label1.setText(self.label1data[0])
+    def slider2change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value(),self.slider3.value()))
+        main["OptimizeWindow"].MakeImg()
+        if self.label2datanum >1:
+            if len(self.label2data)>self.slider2.value():
+                self.label2.setText(self.label2data[self.slider2.value()])
+            else:
+                self.label2.setText(self.label2data[0])
+    def slider3change(self):
+        main["ImgTodoListWindow"].SetCommand(self.num,True,"%s:%d,%d,%d"%(self.windowTitle(),self.slider1.value(),self.slider2.value(),self.slider3.value()))
+        main["OptimizeWindow"].MakeImg()
+        if self.label3datanum >1:
+            if len(self.label3data)>self.slider3.value():
+                self.label3.setText(self.label3data[self.slider3.value()])
+            else:
+                self.label3.setText(self.label3data[0])
+    def SetShowLabel(self,num1,data1,num2,data2,num3,data3):
+        self.label1=QLabel()
+        self.label1datanum=num1
+        self.label1data=data1
+        self.label2datanum=num2
+        self.label2data=data2
+        self.label3datanum=num3
+        self.label3data=data3
+        if num1>0:
+            self.layout.addWidget(self.label1)
+        self.layout.addWidget(self.slider1)
+        if num2>0:
+            self.layout.addWidget(self.label2)
+        self.layout.addWidget(self.slider2)
+        if num3>0:
+            self.layout.addWidget(self.label3)
+        self.layout.addWidget(self.slider3)
+
+
+class TodoImgListWidget(QListWidget):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        # 拖拽设置
+        self.setAcceptDrops(True)
+        self.setDragEnabled(True)
+        self.setDragDropMode(QAbstractItemView.InternalMove)            # 设置拖放
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)  # 设置选择多个
+        self.setDefaultDropAction(Qt.MoveAction)
+        self.setViewMode(self.ListMode)
+class haveguiListWidgetIte(QListWidgetItem):
+    def __init__(self,gui):
+        super().__init__()
+        self.gui=gui
+    def showgui(self):
+        self.gui.show()
+class ImgTodoListWindow(QWidget):#图片处理序列命令窗口
+    def __init__(self):
+        super(ImgTodoListWindow, self).__init__()
+        self.setWindowTitle("命令序列")
+        mainlayout = QHBoxLayout()
+        leftlayout =QGridLayout()
+        rightlayour=QGridLayout()
+        self.setLayout(mainlayout)
+        mainlayout.addLayout(leftlayout)
+        mainlayout.addLayout(rightlayour)
+        #左边一个ListWeight
+        self.commandlist=TodoImgListWidget()
+        self.commandlist.doubleClicked.connect(self.commandlistdoubleClicked)
+        self.commandlist.itemChanged.connect(self.commandlistitemchange)
+        leftlayout.addWidget(self.commandlist)
+        #右边一堆Button
+        button3=QPushButton()
+        rightlayour.addWidget(button3)
+        button3.setText("方框滤波")
+        button3.clicked.connect(self.button3clicked)
+
+        button1=QPushButton()
+        rightlayour.addWidget(button1)
+        button1.setText("均值滤波")
+        button1.clicked.connect(self.button1clicked)
+
+        button2=QPushButton()
+        rightlayour.addWidget(button2)
+        button2.setText("高斯滤波")
+        button2.clicked.connect(self.button2clicked)
+
+        button4=QPushButton()
+        rightlayour.addWidget(button4)
+        button4.setText("中值滤波")
+        button4.clicked.connect(self.button4clicked)
+
+        button5=QPushButton()
+        rightlayour.addWidget(button5)
+        button5.setText("双边滤波")
+        button5.clicked.connect(self.button5clicked)
+
+        button6=QPushButton()
+        rightlayour.addWidget(button6)
+        button6.setText("显示图片")
+        button6.clicked.connect(self.button6clicked)
+
+        buttondel=QPushButton()
+        rightlayour.addWidget(buttondel)
+        buttondel.setText("删除选中")
+        buttondel.clicked.connect(self.buttondelclicked)
+
+        self.windict={}
+        main["ImgTodoListWindow"]=self
+        
+    def button1clicked(self):
+        num=self.commandlist.count()
+        x=doublesilder(num,1,100,1,100,"均值滤波")
+        x.show()
+        self.AddCommand(True,"均值滤波:5,5",x)
+
+    def button2clicked(self):
+        num=self.commandlist.count()
+        x=threesilder(num,1,100,1,100,0,200,"高斯滤波")
+        x.SetShowLabel(0,[""],0,[""],0,[""])
+        x.show()
+        self.AddCommand(True,"高斯滤波:5,5,0",x)
+    def button3clicked(self):
+        num=self.commandlist.count()
+        x=doublesilder(num,1,100,1,100,"方框滤波")
+        x.show()
+        self.AddCommand(True,"方框滤波:5,5",x)
+    def button4clicked(self):
+        num=self.commandlist.count()
+        x=doublesilder(num,1,100,1,100,"中值滤波")
+        x.show()
+        self.AddCommand(True,"中值滤波:5,5",x)
+    def button5clicked(self):
+        num=self.commandlist.count()
+        x=threesilder(num,0,255,0,255,0,255,"双边滤波")
+        x.SetShowLabel(0,[""],0,[""],0,[""])
+        x.show()
+        self.AddCommand(True,"双边滤波:0,0,0",x)
+
+    def button6clicked(self):
+        self.AddCommand(True,"显示图片",None)
+    def buttondelclicked(self):
+        secd=self.commandlist.selectedItems()
+        list1=[]
+        for i in secd:
+            list1.append(self.commandlist.row(i))
+        for i in list1[::-1]:
+            self.commandlist.takeItem(i)
+        None
+    def commandlistdoubleClicked(self):
+        if (self.commandlist.currentItem()):
+            self.commandlist.item(self.commandlist.currentRow()).showgui()
+    def commandlistitemchange(self):
+        main["OptimizeWindow"].MakeImg(self.num)
+    def AddCommand(self,use,command,gui,fromtext1=0,totext1=0):
+        if fromtext1==0 and totext1==0:
+            fromtext1=self.commandlist.count()
+            totext1=fromtext1+1
+        qwidget1=QWidget()
+        cllayout=QHBoxLayout()
+        usecommand=QRadioButton()
+        usecommand.setChecked(use)
+        commandlabel=QLabel()
+        commandlabel.setText(command)
+        fromtext=QLineEdit()
+        fromtext.setText(str(fromtext1))
+        fromtext.setObjectName("from")
+        totext=QLineEdit()
+        totext.setText(str(totext1))
+        main["OptimizeWindow"].defLoadimg=str(totext1)
+        totext.setObjectName("to")
+        cllayout.addWidget(usecommand)
+        cllayout.addWidget(commandlabel)
+        cllayout.addWidget(fromtext)
+        cllayout.addWidget(totext)
+        qwidget1.setLayout(cllayout)
+        qlistwidgetitem1=haveguiListWidgetIte(gui)
+        qlistwidgetitem1.setSizeHint(QSize(0,50));
+        self.commandlist.addItem(qlistwidgetitem1)
+        self.commandlist.setItemWidget(qlistwidgetitem1,qwidget1)
+        main["OptimizeWindow"].MakeImg()
+    def GetCommand(self,num):
+        i=self.commandlist.itemWidget(self.commandlist.item(num))
+        use=i.findChild(QRadioButton)
+        command=i.findChild(QLabel)
+        fromtext=i.findChild(QLineEdit,"from")
+        totext=i.findChild(QLineEdit,"to")
+        return [use.isChecked(),command.text(),fromtext.text(),totext.text()]
+    def GetCommandListItem(self,qlistitem:QListWidgetItem):
+        i=self.commandlist.itemWidget(qlistitem)
+        use=i.findChild(QRadioButton)
+        command=i.findChild(QLabel)
+        fromtext=i.findChild(QLineEdit,"from")
+        totext=i.findChild(QLineEdit,"to")
+        return [use.isChecked(),command.text(),fromtext.text(),totext.text()]
+    def SetCommand(self,num,checked,command,fromtext="0",totext="0"):
+        i=self.commandlist.itemWidget(self.commandlist.item(num))
+        usecommand=i.findChild(QRadioButton)
+        usecommand.setChecked(checked)
+        commandlabel=i.findChild(QLabel)
+        commandlabel.setText(command)
+        if fromtext!="0" and totext!="0":
+            fromlinetext=i.findChild(QLineEdit,"from")
+            fromlinetext.setText(fromtext)
+            tolinetext=i.findChild(QLineEdit,"to")
+            tolinetext.setText(totext)
+    def SetCommandListItem(self,qlistitem:QListWidgetItem,checked,command,fromtext="0",totext="0"):
+        i=self.commandlist.itemWidget(qlistitem)
+        usecommand=i.findChild(QRadioButton)
+        usecommand.setChecked(checked)
+        commandlabel=i.findChild(QLabel)
+        commandlabel.setText(command)
+        if fromtext!="0" and totext!="0":
+            fromlinetext=i.findChild(QLineEdit,"from")
+            fromlinetext.setText(fromtext)
+            tolinetext=i.findChild(QLineEdit,"to")
+            tolinetext.setText(totext)
 class OptimizeWindow(QWidget):#优化工具窗口
     def __init__(self):
         super(OptimizeWindow, self).__init__()
@@ -23,25 +332,145 @@ class OptimizeWindow(QWidget):#优化工具窗口
         toolButton1 = QAction(text="处理列表", parent=self)
         toolBar.addAction(toolButton1)
         #处理列表 得有开关选项 双击进入gui修改模式，修改后自动向下计算 多个gui可以同时控制图片
+        self.imgcachelist={}#图片处理中间文件
         toolButton2 = QAction(text="载入预设", parent=self)
         toolBar.addAction(toolButton2)
+        #预设从文件中读取查询文件夹举出所有文件
         toolButton3 = QAction(text="保存预设", parent=self)
         toolBar.addAction(toolButton3)
+        #将现有处理列表参数转换成预设文件
+        toolButton4 = QAction(text="应用到文件", parent=self)
+        toolBar.addAction(toolButton4)
         self.setLayout(layout)
         self.slider1 = QSlider()
         self.slider1.setRange(0,0)
         self.slider1.setValue(0)
         self.slider1.setOrientation(Qt.Horizontal)
+        self.slider1.valueChanged.connect(self.doChangePage)
         layout.addWidget(self.slider1)
-
+        self.defLoadimg="0"
         self.picview = QGraphicsView()
         layout.addWidget(self.picview)
         self.setWindowTitle("优化工具")
-        
+        self.imgtodolistwindow=ImgTodoListWindow()
         self.resize(800,600)
+        main["OptimizeWindow"]=self
+        
+        
     def OnClickToolbarButton(self,o):
-        if o.text()=="":
-            None
+        if o.text()=="处理列表":
+            
+            self.imgtodolistwindow.show()
+    def LoadFromSelect(self):
+        select=main["self"].listWidget.selectedItems()
+        self.pagenumlist=[]
+        for i in select:
+            self.pagenumlist.append(main["self"].listWidget.row(i))
+        self.slider1.setRange(0,len(self.pagenumlist)-1)
+        self.LoadImg(self.pagenumlist[0])
+    def DoBlur(self,vaule,from1,to1):
+        self.imgcachelist[to1]=cv2.blur(self.imgcachelist[from1],(int(vaule[0]),int(vaule[1])))
+        
+    def DoGaussianBlur(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        if x%2==0:
+            x+=1
+        if y%2==0:
+            y+=1
+        self.imgcachelist[to1]=cv2.GaussianBlur(self.imgcachelist[from1],(x,y),float(vaule[2])/10)
+    def DoboxFilter(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        self.imgcachelist[to1]=cv2.boxFilter(self.imgcachelist[from1],cv2.CV_8U,(x,y))
+    def DoMedianBlur(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        if x%2==0:
+            x+=1
+        if y%2==0:
+            y+=1
+        self.imgcachelist[to1]=cv2.medianBlur(self.imgcachelist[from1],(x,y))
+    def DoBilateralFilter(self,vaule,from1,to1):
+        (x,y,z)=(int(vaule[0]),int(vaule[1]),int(vaule[2]))
+        self.imgcachelist[to1]=cv2.bilateralFilter(self.imgcachelist[from1],x,y,z)
+    def DoShowImg(self,from1,to1):
+        self.imgcachelist[to1]=self.imgcachelist[from1]
+        self.defLoadimg=to1
+    def DoDilate(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        if x%2==0:
+            x+=1
+        if y%2==0:
+            y+=1
+        self.imgcachelist[to1]=cv2.dilate(self.imgcachelist[from1],(x,y))
+    def DoErode(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        if x%2==0:
+            x+=1
+        if y%2==0:
+            y+=1
+        self.imgcachelist[to1]=cv2.erode(self.imgcachelist[from1],(x,y))
+    def DoFloodFill(self,vaule,from1,to1):
+        (x,y)=(int(vaule[0]),int(vaule[1]))
+        if x%2==0:
+            x+=1
+        if y%2==0:
+            y+=1
+        self.imgcachelist[to1]=cv2.floodFill(self.imgcachelist[from1],(x,y))
+    def linkstart(self,command,num):
+        #command约定
+        cmd=command[1].split(":")
+        if cmd[0]=="均值滤波":
+            vaule=cmd[1].split(',')
+            self.DoBlur(vaule,command[2],command[3])
+        elif cmd[0]=="高斯滤波":
+            vaule=cmd[1].split(',')
+            self.DoGaussianBlur(vaule,command[2],command[3])
+        elif cmd[0]=="方框滤波":
+            vaule=cmd[1].split(',')
+            self.DoboxFilter(vaule,command[2],command[3])
+        elif cmd[0]=="中值滤波":
+            vaule=cmd[1].split(',')
+            self.DoMedianBlur(vaule,command[2],command[3])
+        elif cmd[0]=="双边滤波":
+            vaule=cmd[1].split(',')
+            self.DoBilateralFilter(vaule,command[2],command[3])
+        elif cmd[0]=="膨胀":
+            vaule=cmd[1].split(',')
+            self.DoDilate(vaule,command[2],command[3])
+        elif cmd[0]=="腐蚀":
+            vaule=cmd[1].split(',')
+            self.DoErode(vaule,command[2],command[3])
+        elif cmd[0]=="显示图片":
+            self.DoShowImg(command[2],command[3])
+        None
+    def todoCommand(self):
+        #获取序列数据
+        commandlist=[]
+        for i in range(main["ImgTodoListWindow"].commandlist.count()):
+            commandlist.append(main["ImgTodoListWindow"].GetCommand(i))
+        #匹配执行命令
+        for i in range(0,len(commandlist)):
+            if commandlist[i][0]==True:
+                self.linkstart(commandlist[i],i)
+    def LoadImg(self,num):
+        img=QPixmap()
+        imgdata=main["self"].GetPageToData(num)
+        self.imgcachelist[self.defLoadimg]=imgdata
+        #执行函数序列
+        self.todoCommand()
+
+        img.loadFromData(np.array(cv2.imencode('.jpg',self.imgcachelist[self.defLoadimg])[1]).tobytes())
+        secen=QGraphicsScene()
+        secen.addPixmap(img)
+        self.picview.setScene(secen)
+    def MakeImg(self):
+        self.todoCommand()
+        img=QPixmap()
+        img.loadFromData(np.array(cv2.imencode('.jpg',self.imgcachelist[self.defLoadimg])[1]).tobytes())
+        secen=QGraphicsScene()
+        secen.addPixmap(img)
+        self.picview.setScene(secen)
+    def doChangePage(self):
+        self.LoadImg(self.pagenumlist[self.slider1.value()])
 
 class MergeListWidget(QListWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
@@ -103,7 +532,7 @@ class MergeListWindow(QWidget):#合并工具 列表窗口
             del item
     def OnSave(self):
         table=[]
-        for i in range(self.list1.count()-1):
+        for i in range(self.list1.count()):
             table.append(self.list1.item(i).text())
         if len(table)==0:
             return
@@ -302,9 +731,8 @@ class ListWidget(QListWidget):
                         elif filePath[-4:] in {".png", ".jpg"}:
                             if main["self"].doc == None:
                                 main["self"].doc = fitz.open()
-                            else:
-                                main["self"].insterfile = filePath
-                                main["self"].DoInster()
+                            main["self"].insterfile = filePath
+                            main["self"].DoInster()
 
         else:
             e.accept()
@@ -438,8 +866,12 @@ class Window(QWidget):
             #?合并功能 新窗口 拥有调整文件合并顺序的功能
             #?在一个窗口中显示 文件列表 保存路径
         if o.text() =="优化":
-            self.optimizewindow=OptimizeWindow()
-            self.optimizewindow.show()
+            if len(self.listWidget.selectedItems())!=0:
+                self.optimizewindow=OptimizeWindow()
+                self.optimizewindow.show()
+                self.optimizewindow.LoadFromSelect()
+            else:
+                QMessageBox.question(self, '提示', "未选择需要优化的页面", QMessageBox.Yes)
 
     def OnOutPut(self,zoom,mase,savefile):
         if self.doc != None:
@@ -625,7 +1057,16 @@ class Window(QWidget):
             RateOfProgress+=1
             procbar.SetVaule(RateOfProgress)
         procbar.close()
-
+    def GetPageToData(self,pagenum):
+        page=self.doc[pagenum]
+        zoom=1.3
+        mat = fitz.Matrix(zoom, zoom).preRotate(0)
+        pix = page.getPixmap(matrix=mat, alpha=False)
+        imgdata=pix.getImageData(output="png")
+        image_array = np.frombuffer(imgdata, dtype=np.uint8)
+        img_cv = cv2.imdecode(image_array, cv2.IMREAD_ANYCOLOR)
+        #jpgimg=cv2.imencode(".jpg",img_cv,[cv2.IMWRITE_JPEG_QUALITY,100])
+        return img_cv
 
 app = QApplication(sys.argv)
 screen = Window()
